@@ -1,20 +1,15 @@
 import os
 import sys
 from pathlib import Path
-from PyInstaller.building.build_main import (
-    PYZ, EXE, COLLECT, BUNDLE,
-    windows_console_agent,
-)
+from PyInstaller.building.build_main import Analysis, PYZ, EXE
 
 proj_root = Path(__file__).parent.resolve()
 sys.path.insert(0, str(proj_root))
 
-# Get version from pyproject.toml or hardcode
-version = "5.2.5"  # fallback
+version = "5.2.5"
 
 block_cipher = None
 
-# Hidden imports
 hiddenimports = [
     'pendulum',
     'curl_cffi',
