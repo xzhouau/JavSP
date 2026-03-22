@@ -262,45 +262,17 @@ def info_summary(movie: Movie, all_info: Dict[str, MovieInfo]):
 def generate_names(movie: Movie):
     """按照模板生成相关文件的文件名"""
 
-    def legalize_path(path: str):
+def legalize_path(path: str):
         """
             Windows下文件名中不能包含换行 #467
             所以这里对文件路径进行合法化
         """
-        return ''.join(c for c in path if c not in {'\n'})
+        import re
+        # 移除Windows非法字符: < > : " / \ | ? * 以及控制字符
+        # 替换为全角破折号
+        result = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '－', path)
+        return result
 
-    info = movie.info
-    # 准备用来填充命名模板的字典
-    d = info.get_info_dic()
-
-    if info.actress and len(info.actress) > Cfg().summarizer.path.max_actress_count:
-        logging.debug('女优人数过多，按配置保留了其中的前n个: ' + ','.join(info.actress))
-        actress = info.actress[:Cfg().summarizer.path.max_actress_count] + ['…']
-    else:
-        actress = info.actress
-    d['actress'] = ','.join(actress) if actress else Cfg().summarizer.default.actress
-
-    # 保存label供后面判断裁剪图片的方式使用
-    setattr(info, 'label', d['label'].upper())
-    # 处理字段：替换不能作为文件名的字符，移除首尾的空字符
-    for k, v in d.items():
-        d[k] = replace_illegal_chars(v.strip())
-
-    # 生成nfo文件中的影片标题
-    nfo_title = Cfg().summarizer.nfo.title_pattern.format(**d)
-    setattr(info, 'nfo_title', nfo_title)
-    
-    # 使用字典填充模板，生成相关文件的路径（多分片影片要考虑CD-x部分）
-    cdx = '' if len(movie.files) <= 1 else '-CD1'
-    if hasattr(info, 'title_break'):
-        title_break = info.title_break
-    else:
-        title_break = split_by_punc(d['title'])
-    if hasattr(info, 'ori_title_break'):
-        ori_title_break = info.ori_title_break
-    else:
-        ori_title_break = split_by_punc(d['rawtitle'])
-    copyd = d.copy()
 
     def legalize_info():
         if movie.save_dir != None:
