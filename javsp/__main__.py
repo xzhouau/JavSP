@@ -269,7 +269,7 @@ def generate_names(movie: Movie):
         """
         import re
         # 移除Windows非法字符: < > : " / \ | ? * 以及控制字符
-        return re.sub(r'[<>:"/\\|?*\x00-\x1f]', '－', path)
+        return re.sub(r'[<>:"|?*\x00-\x1f]', '－', path)
 
     info = movie.info
     # 准备用来填充命名模板的字典
