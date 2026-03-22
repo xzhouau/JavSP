@@ -25,6 +25,8 @@ packages = [
     'pendulum', # pydantic_extra_types depends on pendulum
     'curl_cffi', # for CloudFlare bypass
     'lxml_html_clean', # lxml.html.clean is now separate
+    'chardet', # requests dependency
+    'charset_normalizer', # requests dependency
 ]
 
 build_exe = {
