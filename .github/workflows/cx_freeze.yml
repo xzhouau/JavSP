@@ -54,7 +54,7 @@ jobs:
         run: poetry install
 
       - name: Build with PyInstaller
-        run: poetry run python setup.py
+        run: poetry run pyinstaller JavSP.spec
 
       - name: Set VERSION variable for windows
         shell: bash
