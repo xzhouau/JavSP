@@ -3,7 +3,10 @@ import sys
 from pathlib import Path
 from PyInstaller.building.build_main import Analysis, PYZ, EXE
 
-proj_root = Path(__file__).parent.resolve()
+# Get project root from spec file location (spec is in project root)
+spec_dir = Path(sys.argv[0] if '__file__' not in dir() else __file__).parent.resolve()
+proj_root = spec_dir
+
 sys.path.insert(0, str(proj_root))
 
 version = "5.2.5"
@@ -23,13 +26,13 @@ hiddenimports = [
 ]
 
 a = Analysis(
-    ['javsp/__main__.py'],
+    [str(proj_root / 'javsp' / '__main__.py')],
     pathex=[str(proj_root)],
     binaries=[],
     datas=[
-        ('config.yml', '.'),
-        ('data', 'data'),
-        ('image', 'image'),
+        (str(proj_root / 'config.yml'), '.'),
+        (str(proj_root / 'data'), 'data'),
+        (str(proj_root / 'image'), 'image'),
     ],
     hiddenimports=hiddenimports,
     hookspath=[],
@@ -59,5 +62,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     console=True,
-    icon='image/JavSP.ico' if sys.platform == 'win32' else None,
+    icon=str(proj_root / 'image' / 'JavSP.ico') if sys.platform == 'win32' else None,
 )
