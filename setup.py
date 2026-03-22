@@ -1,51 +1,28 @@
 import os
-from typing import List, Tuple
-from cx_Freeze import setup, Executable
-
-# https://github.com/marcelotduarte/cx_Freeze/issues/1288
-base = None
+import sys
+from PyInstaller.__main__ import run
 
 proj_root = os.path.abspath(os.path.dirname(__file__))
 
-
-include_files: List[Tuple[str, str]] = [
-    (f'{proj_root}/config.yml', 'config.yml'),
-    (f'{proj_root}/data', 'data'),
-    (f'{proj_root}/image', 'image')
+# PyInstaller arguments
+args = [
+    '--name=JavSP',
+    '--onefile',  # Single exe file
+    '--windowed',  # No console window
+    '--add-data=config.yml;.',  # Include config
+    '--add-data=data;data',  # Include data folder
+    '--add-data=image;image',  # Include image folder
+    '--hidden-import=pendulum',
+    '--hidden-import=curl_cffi',
+    '--hidden-import=lxml_html_clean',
+    '--hidden-import=chardet',
+    '--hidden-import=charset_normalizer',
+    '--additional-hooks-dir=.',
+    '--exclude-module=unittest',
+    './javsp/__main__.py',
 ]
 
-includes = []
+if sys.platform == 'win32':
+    args.append('--icon=./image/JavSP.ico')
 
-for file in os.listdir('javsp/web'):
-    name, ext = os.path.splitext(file)
-    if ext == '.py':
-        includes.append('javsp.web.' + name)
-
-packages = [ 
-    'pendulum', # pydantic_extra_types depends on pendulum
-    'curl_cffi', # for CloudFlare bypass
-    'lxml_html_clean', # lxml.html.clean is now separate
-    'chardet', # requests dependency
-    'charset_normalizer', # requests dependency
-]
-
-build_exe = {
-    'include_files': include_files,
-    'includes': includes,
-    'excludes': ['unittest'],
-    'packages': packages,
-}
-
-javsp = Executable(
-    './javsp/__main__.py', 
-    target_name='JavSP', 
-    base=base,
-    icon='./image/JavSP.ico',
-)
-
-setup(
-    name='JavSP',
-    options = {'build_exe': build_exe}, 
-    executables=[javsp]
-)
-
+run(args)

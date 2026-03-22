@@ -40,7 +40,7 @@ server = "javsp.server:entry"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
 flake8 = "^7.0.0"
-cx-freeze = "^7.2.2"
+pyinstaller = "^6.10.0"
 types-lxml = "^2024.4.14"
 types-pillow = "^10.2.0.20240822"
 
