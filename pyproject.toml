@@ -34,10 +34,7 @@ slimeface = "^2024.9.27"
 javsp = "javsp.__main__:entry"
 server = "javsp.server:entry"
 
-[[tool.poetry.source]]
-name = "mirrors"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
-priority = "primary"
+
 
 
 [tool.poetry.group.dev.dependencies]
