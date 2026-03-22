@@ -11,7 +11,7 @@ sep = ';' if sys.platform == 'win32' else ':'
 args = [
     '--name=JavSP',
     '--onefile',  # Single exe file
-    '--windowed',  # No console window
+    '--console',  # Show console window (required for stdout/stderr)
     f'--add-data=config.yml{sep}.',  # Include config
     f'--add-data=data{sep}data',  # Include data folder
     f'--add-data=image{sep}image',  # Include image folder
