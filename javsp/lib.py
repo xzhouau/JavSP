@@ -18,15 +18,19 @@ def re_escape(s: str) -> str:
 def resource_path(path: str) -> str:
     """获取一个随代码打包的文件在解压后的路径"""
     if getattr(sys, "frozen", False):
-        # cx_Freeze on macOS: get the directory containing the executable
+        # PyInstaller: resources are extracted to sys._MEIPASS
+        if hasattr(sys, '_MEIPASS'):
+            meipass_path = Path(sys._MEIPASS) / path
+            if meipass_path.exists():
+                return str(meipass_path)
+        # Fallback: exe directory
+        exe_dir = Path(sys.executable).parent
+        # cx_Freeze on macOS app bundle
         if sys.platform == 'darwin':
-            app_dir = Path(sys.executable).parent
-            # In macOS app bundle, Resources is at Contents/Resources
-            bundle_dir = app_dir / '..' / 'Resources'
+            bundle_dir = exe_dir / '..' / 'Resources'
             if bundle_dir.exists():
                 return str(bundle_dir / path)
-            return str(app_dir / path)
-        return path
+        return str(exe_dir / path)
     else:
         path_joined = Path(__file__).parent.parent / path
         return str(path_joined)

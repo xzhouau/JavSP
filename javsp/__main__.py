@@ -396,8 +396,8 @@ def reviewMovieID(all_movies, root):
         print()
 
 
-SUBTITLE_MARK_FILE = Image.open(os.path.abspath(resource_path('image/sub_mark.png')))
-UNCENSORED_MARK_FILE = Image.open(os.path.abspath(resource_path('image/unc_mark.png')))
+SUBTITLE_MARK_FILE = Image.open(resource_path('image/sub_mark.png'))
+UNCENSORED_MARK_FILE = Image.open(resource_path('image/unc_mark.png'))
 
 def process_poster(movie: Movie):
     def should_use_ai_crop_match(label):
