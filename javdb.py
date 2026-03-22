@@ -44,12 +44,9 @@ def get_html_wrapper(url):
                     cookies_pool = []
             if len(cookies_pool) > 0:
                 item = cookies_pool.pop()
-                # 更换Cookies时需要创建新的request实例，否则curl_cffi会保留它内部第一次发起网络访问时获得的Cookies
+                # 更换Cookies时需要创建新的request实例，否则cloudscraper会保留它内部第一次发起网络访问时获得的Cookies
                 request = Request(use_scraper=True)
                 request.cookies = item['cookies']
-                # curl_cffi 需要手动把 Cookie 同步到 Session 才能生效
-                if request.session:
-                    request.session.cookies.update(request.cookies)
                 cookies_source = (item['profile'], item['site'])
                 logger.debug(f'未携带有效Cookies而发生重定向，尝试更换Cookies为: {cookies_source}')
                 return get_html_wrapper(url)

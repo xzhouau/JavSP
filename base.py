@@ -6,7 +6,7 @@ import shutil
 import logging
 import requests
 import contextlib
-from curl_cffi import requests as curl_requests
+import cloudscraper
 import lxml.html
 from tqdm import tqdm
 from lxml import etree
@@ -47,25 +47,24 @@ class Request():
         self.proxies = read_proxy()
         self.timeout = Cfg().network.timeout.total_seconds()
         if not use_scraper:
-            self.session = None
+            self.scraper = None
             self.__get = requests.get
             self.__post = requests.post
             self.__head = requests.head
         else:
-            # 使用 curl_cffi 替换 cloudscraper
-            self.session = curl_requests.Session(impersonate="chrome")
-            self.__get = self._scraper_monitor(self.session.get)
-            self.__post = self._scraper_monitor(self.session.post)
-            self.__head = self._scraper_monitor(self.session.head)
+            self.scraper = cloudscraper.create_scraper()
+            self.__get = self._scraper_monitor(self.scraper.get)
+            self.__post = self._scraper_monitor(self.scraper.post)
+            self.__head = self._scraper_monitor(self.scraper.head)
 
     def _scraper_monitor(self, func):
-        """监控curl_cffi的工作状态，遇到不支持的Challenge时尝试退回常规的requests请求"""
+        """监控cloudscraper的工作状态，遇到不支持的Challenge时尝试退回常规的requests请求"""
         def wrapper(*args, **kw):
             try:
                 return func(*args, **kw)
             except Exception as e:
                 logger.debug(f"无法通过CloudFlare检测: '{e}', 尝试退回常规的requests请求")
-                if func == self.session.get:
+                if func == self.scraper.get:
                     return requests.get(*args, **kw)
                 else:
                     return requests.post(*args, **kw)
@@ -77,9 +76,6 @@ class Request():
                       proxies=self.proxies,
                       cookies=self.cookies,
                       timeout=self.timeout)
-        # curl_cffi 需要手动同步 Cookie 到 Session
-        if self.session and hasattr(self, 'cookies'):
-            self.session.cookies.update(self.cookies)
         if not delay_raise:
             r.raise_for_status()
         return r
@@ -91,9 +87,6 @@ class Request():
                       proxies=self.proxies,
                       cookies=self.cookies,
                       timeout=self.timeout)
-        # curl_cffi 需要手动同步 Cookie 到 Session
-        if self.session and hasattr(self, 'cookies'):
-            self.session.cookies.update(self.cookies)
         if not delay_raise:
             r.raise_for_status()
         return r
@@ -126,7 +119,7 @@ def request_get(url, cookies={}, timeout=None, delay_raise=False):
     if timeout is None:
         timeout = Cfg().network.timeout.seconds
     
-    r = curl_requests.get(url, headers=headers, proxies=read_proxy(), cookies=cookies, timeout=timeout, impersonate="chrome")
+    r = requests.get(url, headers=headers, proxies=read_proxy(), cookies=cookies, timeout=timeout)
     if not delay_raise:
         if r.status_code == 403 and b'>Just a moment...<' in r.content:
             raise SiteBlocked(f"403 Forbidden: 无法通过CloudFlare检测: {url}")
@@ -139,27 +132,18 @@ def request_post(url, data, cookies={}, timeout=None, delay_raise=False):
     """向指定url发送post请求"""
     if timeout is None:
         timeout = Cfg().network.timeout.seconds
-    r = curl_requests.post(url, data=data, headers=headers, proxies=read_proxy(), cookies=cookies, timeout=timeout, impersonate="chrome")
+    r = requests.post(url, data=data, headers=headers, proxies=read_proxy(), cookies=cookies, timeout=timeout)
     if not delay_raise:
         r.raise_for_status()
     return r
 
 
 def get_resp_text(resp: Response, encoding=None):
-    """提取Response的文本，处理curl_cffi和requests的不同encoding方式"""
+    """提取Response的文本"""
     if encoding:
         resp.encoding = encoding
     else:
-        # curl_cffi 的响应没有 apparent_encoding，需要特殊处理
-        if hasattr(resp, 'apparent_encoding'):
-            resp.encoding = resp.apparent_encoding
-        else:
-            # curl_cffi 尝试从响应头或内容推断编码
-            if resp.content:
-                try:
-                    resp.encoding = resp.apparent_encoding
-                except:
-                    resp.encoding = 'utf-8'
+        resp.encoding = resp.apparent_encoding
     return resp.text
 
 
@@ -251,7 +235,7 @@ def urlretrieve(url, filename=None, reporthook=None, headers=None):
 
 def download(url, output_path, desc=None):
     """下载指定url的资源"""
-    # 支持"下载"本地资源，以供fc2fan的本地镜像所使用
+    # 支持“下载”本地资源，以供fc2fan的本地镜像所使用
     if not url.startswith('http'):
         start_time = time.time()
         shutil.copyfile(url, output_path)

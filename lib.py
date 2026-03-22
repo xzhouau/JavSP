@@ -18,14 +18,6 @@ def re_escape(s: str) -> str:
 def resource_path(path: str) -> str:
     """获取一个随代码打包的文件在解压后的路径"""
     if getattr(sys, "frozen", False):
-        # cx_Freeze on macOS: get the directory containing the executable
-        if sys.platform == 'darwin':
-            app_dir = Path(sys.executable).parent
-            # In macOS app bundle, Resources is at Contents/Resources
-            bundle_dir = app_dir / '..' / 'Resources'
-            if bundle_dir.exists():
-                return str(bundle_dir / path)
-            return str(app_dir / path)
         return path
     else:
         path_joined = Path(__file__).parent.parent / path

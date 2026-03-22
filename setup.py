@@ -22,7 +22,9 @@ for file in os.listdir('javsp/web'):
         includes.append('javsp.web.' + name)
 
 packages = [ 
-    'pendulum' # pydantic_extra_types depends on pendulum
+    'pendulum', # pydantic_extra_types depends on pendulum
+    'curl_cffi', # for CloudFlare bypass
+    'lxml_html_clean', # lxml.html.clean is now separate
 ]
 
 build_exe = {
