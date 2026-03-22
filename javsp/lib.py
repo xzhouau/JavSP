@@ -16,7 +16,15 @@ def re_escape(s: str) -> str:
 
 
 def resource_path(path: str) -> str:
-    """获取一个随代码打包的文件在解压后的路径"""
+    """获取一个随代码打包的文件在解压后的路径
+    
+    优先级：当前目录 > MEIPASS > exe目录 > 源码目录
+    """
+    # 始终优先检查当前工作目录（用户放置的配置文件）
+    cwd_path = Path.cwd() / path
+    if cwd_path.exists():
+        return str(cwd_path)
+    
     if getattr(sys, "frozen", False):
         # PyInstaller: resources are extracted to sys._MEIPASS
         if hasattr(sys, '_MEIPASS'):

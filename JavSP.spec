@@ -13,6 +13,14 @@ version = "5.2.5"
 
 block_cipher = None
 
+# All web crawler modules
+web_modules = [
+    'airav', 'arzon', 'arzon_iv', 'avsox', 'avwiki', 'dl_getchu',
+    'fanza', 'fc2', 'fc2fan', 'fc2ppvdb', 'gyutto', 'jav321',
+    'javbus', 'javdb', 'javlib', 'javmenu', 'mgstage', 'njav',
+    'prestige', 'proxyfree', 'translate',
+]
+
 hiddenimports = [
     'pendulum',
     'curl_cffi',
@@ -23,7 +31,7 @@ hiddenimports = [
     'lxml.html',
     'lxml.etree',
     'lxml_html_clean',
-]
+] + [f'javsp.web.{m}' for m in web_modules]
 
 a = Analysis(
     [str(proj_root / 'javsp' / '__main__.py')],
