@@ -47,12 +47,14 @@ jobs:
       - name: Setup dynamic versioning
         run: poetry self add poetry-dynamic-versioning
 
-      - name: Install dependencies
-        run: |
-          poetry install
+      - name: Update lock file
+        run: poetry lock
 
-      - name: Build with Cx_Freeze
-        run: poetry run python setup.py build_exe -b dist
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Build with PyInstaller
+        run: poetry run python setup.py
 
       - name: Set VERSION variable for windows
         shell: bash
